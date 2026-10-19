@@ -26,6 +26,21 @@ export default defineConfig(
     },
   },
   {
+    files: ['apps/api/**/*.ts'],
+    languageOptions: { globals: globals.node },
+    rules: {
+      // NestJS modules are empty classes carrying decorators.
+      '@typescript-eslint/no-extraneous-class': ['error', { allowWithDecorator: true }],
+    },
+  },
+  {
+    files: ['**/*.spec.ts', '**/*.spec.tsx', '**/test/**/*.ts'],
+    rules: {
+      // Assertions such as expect(mock.method) reference methods without calling them.
+      '@typescript-eslint/unbound-method': 'off',
+    },
+  },
+  {
     files: ['**/*.{js,mjs,cjs}'],
     extends: [tseslint.configs.disableTypeChecked],
     languageOptions: { globals: globals.node },
