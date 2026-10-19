@@ -13,3 +13,10 @@ onlyBuiltDependencies:
 
 # Required by `pnpm deploy` to produce self-contained production bundles in Docker builds.
 injectWorkspacePackages: true
+
+# Scripts we explicitly do not run: telemetry, and optional native builds of the Docker client.
+ignoredBuiltDependencies:
+  - '@scarf/scarf'
+  - cpu-features
+  - protobufjs
+  - ssh2

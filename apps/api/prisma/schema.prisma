@@ -1,0 +1,150 @@
+// RiadOS data model.
+// Row-Level Security policies, the overlap exclusion constraint and database roles cannot be
+// expressed in Prisma: they live in the SQL of the initial migration.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  OWNER
+  RECEPTION
+  HOUSEKEEPING
+}
+
+enum ReservationStatus {
+  CONFIRMED
+  CHECKED_IN
+  CHECKED_OUT
+  CANCELLED
+}
+
+enum BookingSource {
+  DIRECT
+  BOOKING_COM
+  AIRBNB
+}
+
+/// A property (riad or guest house). Platform table: not subject to RLS.
+model Tenant {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String
+  slug      String   @unique
+  currency  String   @default("MAD") @db.Char(3)
+  timezone  String   @default("Africa/Casablanca")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  users        User[]
+  rooms        Room[]
+  guests       Guest[]
+  reservations Reservation[]
+
+  @@map("tenants")
+}
+
+/// Staff member. Platform table: login happens before the tenant is known.
+model User {
+  id           String   @id @default(uuid()) @db.Uuid
+  tenantId     String   @map("tenant_id") @db.Uuid
+  email        String   @unique
+  fullName     String   @map("full_name")
+  passwordHash String   @map("password_hash")
+  role         Role
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  tenant        Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  refreshTokens RefreshToken[]
+
+  @@index([tenantId])
+  @@map("users")
+}
+
+/// Hashed refresh token. Tokens of a login session share a family, revoked as a whole on reuse.
+model RefreshToken {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  familyId  String    @map("family_id") @db.Uuid
+  tokenHash String    @unique @map("token_hash")
+  expiresAt DateTime  @map("expires_at") @db.Timestamptz(3)
+  revokedAt DateTime? @map("revoked_at") @db.Timestamptz(3)
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([familyId])
+  @@index([userId])
+  @@map("refresh_tokens")
+}
+
+model Room {
+  id            String   @id @default(uuid()) @db.Uuid
+  tenantId      String   @map("tenant_id") @db.Uuid
+  name          String
+  capacity      Int
+  baseRateCents Int      @map("base_rate_cents")
+  isActive      Boolean  @default(true) @map("is_active")
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  tenant       Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  reservations Reservation[]
+
+  @@unique([tenantId, name])
+  /// Target of the composite foreign key that keeps reservations inside their tenant.
+  @@unique([id, tenantId])
+  @@map("rooms")
+}
+
+model Guest {
+  id        String   @id @default(uuid()) @db.Uuid
+  tenantId  String   @map("tenant_id") @db.Uuid
+  fullName  String   @map("full_name")
+  email     String?
+  phone     String?
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  tenant       Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  reservations Reservation[]
+
+  @@unique([id, tenantId])
+  @@index([tenantId, fullName])
+  @@map("guests")
+}
+
+model Reservation {
+  id          String            @id @default(uuid()) @db.Uuid
+  tenantId    String            @map("tenant_id") @db.Uuid
+  roomId      String            @map("room_id") @db.Uuid
+  guestId     String            @map("guest_id") @db.Uuid
+  /// First night of the stay.
+  checkIn     DateTime          @map("check_in") @db.Date
+  /// Departure day (exclusive): the room is free again that night.
+  checkOut    DateTime          @map("check_out") @db.Date
+  status      ReservationStatus @default(CONFIRMED)
+  source      BookingSource     @default(DIRECT)
+  adults      Int
+  children    Int               @default(0)
+  totalCents  Int               @map("total_cents")
+  currency    String            @db.Char(3)
+  notes       String?
+  createdById String?           @map("created_by_id") @db.Uuid
+  createdAt   DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime          @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  // Composite foreign keys: a reservation can only reference a room or a guest of its own tenant.
+  room   Room   @relation(fields: [roomId, tenantId], references: [id, tenantId], onDelete: Restrict)
+  guest  Guest  @relation(fields: [guestId, tenantId], references: [id, tenantId], onDelete: Restrict)
+
+  @@index([tenantId, checkIn, id])
+  @@index([tenantId, roomId, checkIn])
+  @@map("reservations")
+}
