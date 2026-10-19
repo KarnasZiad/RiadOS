@@ -5,6 +5,7 @@ import type { Response } from 'express';
 import type { Redis } from 'ioredis';
 import { PrismaService } from '../../infrastructure/prisma/prisma.service';
 import { REDIS } from '../../infrastructure/redis/redis.constants';
+import { Public } from '../auth/decorators';
 
 export type ProbeStatus = 'up' | 'down';
 
@@ -33,6 +34,7 @@ async function probe(check: () => Promise<unknown>): Promise<ProbeStatus> {
 }
 
 @ApiTags('health')
+@Public()
 @SkipThrottle()
 @Controller('health')
 export class HealthController {
