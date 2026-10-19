@@ -8,6 +8,7 @@ import { httpLoggerOptions } from './infrastructure/logging/http-logger.options'
 import { PrismaModule } from './infrastructure/prisma/prisma.module';
 import { RedisModule } from './infrastructure/redis/redis.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { BookingModule } from './modules/booking/booking.module';
 import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
 import { RolesGuard } from './modules/auth/guards/roles.guard';
 import { HealthModule } from './modules/health/health.module';
@@ -24,6 +25,7 @@ import { HealthModule } from './modules/health/health.module';
     RedisModule,
     HealthModule,
     AuthModule,
+    BookingModule,
   ],
   // Global guards run in this order: rate limiting, authentication, then role checks.
   providers: [
