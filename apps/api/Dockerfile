@@ -18,9 +18,9 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
 COPY apps/api apps/api
 RUN pnpm --filter @riados/api build
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
-    pnpm --filter @riados/api deploy --prod /out \
- && cd /out \
- && node_modules/.bin/prisma generate
+    pnpm --filter @riados/api deploy --prod /out
+WORKDIR /out
+RUN node_modules/.bin/prisma generate
 
 # ---- Runtime: no compiler, no dev dependencies, non-root user.
 FROM node:22-alpine AS runtime
