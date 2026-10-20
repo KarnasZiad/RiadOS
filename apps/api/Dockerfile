@@ -10,7 +10,7 @@ WORKDIR /repo
 
 # ---- Build: install with the lockfile, compile, then extract production dependencies only.
 FROM base AS build
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.base.json ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc tsconfig.base.json ./
 COPY apps/api/package.json apps/api/
 COPY apps/api/prisma apps/api/prisma
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
