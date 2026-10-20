@@ -8,7 +8,9 @@
 3. Ouvrir une pull request vers `main` en remplissant le template (checklists sécurité et performance).
 4. La CI doit être verte : format, lint, typecheck, tests unitaires avec couverture, build, tests
    d'intégration, image Docker, CodeQL et Trivy.
-5. Fusion en _squash merge_ après revue d'un code owner. `main` est protégée : pas de push direct.
+5. Fusion en _squash merge_. `main` est protégée : pas de push direct, pull request et checks CI
+   obligatoires. Le dépôt a un seul mainteneur, donc aucune approbation n'est exigée ; en équipe,
+   la règle passe à une approbation d'un code owner (`CODEOWNERS`).
 
 ## Prérequis
 
