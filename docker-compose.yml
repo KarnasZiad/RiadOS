@@ -1,6 +1,6 @@
 # Local stack.
 #   docker compose up -d                  PostgreSQL and Redis only (run the API with pnpm dev)
-#   docker compose --profile app up -d    full stack built from the Dockerfiles
+#   docker compose --profile app up -d    full stack built from the Dockerfiles: http://localhost:8080
 name: riados
 
 services:
@@ -67,6 +67,17 @@ services:
         condition: service_completed_successfully
       redis:
         condition: service_healthy
+    restart: unless-stopped
+
+  web:
+    profiles: [app]
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    ports:
+      - '8080:8080'
+    depends_on:
+      - api
     restart: unless-stopped
 
 volumes:
