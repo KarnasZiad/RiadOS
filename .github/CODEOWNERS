@@ -1,0 +1,6 @@
+# Every change is reviewed by a code owner before merging into main.
+* @KarnasZiad
+
+# Changes to the database schema, row-level security or authentication need extra care.
+/apps/api/prisma/ @KarnasZiad
+/apps/api/src/modules/auth/ @KarnasZiad
