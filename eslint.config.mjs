@@ -2,6 +2,8 @@
 import js from '@eslint/js';
 import { defineConfig, globalIgnores } from 'eslint/config';
 import prettier from 'eslint-config-prettier/flat';
+import reactHooks from 'eslint-plugin-react-hooks';
+import reactRefresh from 'eslint-plugin-react-refresh';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
@@ -34,7 +36,19 @@ export default defineConfig(
     },
   },
   {
-    files: ['**/*.spec.ts', '**/*.spec.tsx', '**/test/**/*.ts'],
+    files: ['apps/web/**/*.{ts,tsx}'],
+    extends: [reactHooks.configs.flat.recommended, reactRefresh.configs.vite],
+    languageOptions: { globals: globals.browser },
+    rules: {
+      '@typescript-eslint/consistent-type-imports': ['error', { fixStyle: 'inline-type-imports' }],
+    },
+  },
+  {
+    files: ['apps/web/vite.config.ts'],
+    languageOptions: { globals: globals.node },
+  },
+  {
+    files: ['**/*.spec.ts', '**/*.spec.tsx', '**/test/**/*.{ts,tsx}'],
     rules: {
       // Assertions such as expect(mock.method) reference methods without calling them.
       '@typescript-eslint/unbound-method': 'off',
