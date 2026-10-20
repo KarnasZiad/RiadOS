@@ -42,5 +42,24 @@
     "prettier": "^3.9.10",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.71.2"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@nestjs/core",
+      "@prisma/client",
+      "@prisma/engines",
+      "@swc/core",
+      "esbuild",
+      "prisma"
+    ],
+    "ignoredBuiltDependencies": [
+      "@scarf/scarf",
+      "cpu-features",
+      "protobufjs",
+      "ssh2"
+    ],
+    "overrides": {
+      "deepmerge-ts@<8": "^8.0.2"
+    }
   }
 }
