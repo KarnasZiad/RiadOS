@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1.7
 # Build context: repository root (docker build -f apps/api/Dockerfile .)
 
-FROM node:22-alpine AS base
+FROM node:26-alpine AS base
 ENV PNPM_HOME=/pnpm \
     PATH=/pnpm:$PATH \
     HUSKY=0
@@ -23,7 +23,7 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
  && node_modules/.bin/prisma generate
 
 # ---- Runtime: no compiler, no dev dependencies, non-root user.
-FROM node:22-alpine AS runtime
+FROM node:26-alpine AS runtime
 RUN apk add --no-cache openssl tini
 ENV NODE_ENV=production
 WORKDIR /app
