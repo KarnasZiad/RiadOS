@@ -11,6 +11,8 @@ et Airbnb.
 > Projet de portfolio construit comme un produit d'entreprise : conception documentée (cahier des
 > charges, C4, ADR), TypeScript strict, tests unitaires et d'intégration, CI/CD et scans de sécurité.
 
+![Calendrier des disponibilités](docs/screenshots/calendrier.png)
+
 ## Sommaire
 
 - [Points techniques](#points-techniques)
@@ -65,14 +67,14 @@ dans `domain/`, sans dépendance au framework. Diagrammes complets : [docs/archi
 
 ## Stack
 
-| Couche  | Technologies                                                            |
-| ------- | ----------------------------------------------------------------------- |
-| API     | Node.js 22, NestJS 11, Prisma 6, Zod 4, Pino, Helmet                    |
-| Données | PostgreSQL 17 (RLS, `btree_gist`), Redis 7                              |
-| Front   | React 19, Vite 8, TypeScript, TanStack Query, Tailwind CSS _(en cours)_ |
-| Tests   | Vitest, Supertest, Testcontainers                                       |
-| Qualité | TypeScript strict, ESLint (règles typées), Prettier, Husky, commitlint  |
-| CI/CD   | GitHub Actions, CodeQL, Trivy, Dependabot, images Docker sur GHCR       |
+| Couche  | Technologies                                                           |
+| ------- | ---------------------------------------------------------------------- |
+| API     | Node.js 22, NestJS 11, Prisma 6, Zod 4, Pino, Helmet                   |
+| Données | PostgreSQL 17 (RLS, `btree_gist`), Redis 7                             |
+| Front   | React 19, Vite 8, TypeScript, TanStack Query, React Router, Tailwind 4 |
+| Tests   | Vitest, Testing Library, Supertest, Testcontainers                     |
+| Qualité | TypeScript strict, ESLint (règles typées), Prettier, Husky, commitlint |
+| CI/CD   | GitHub Actions, CodeQL, Trivy, Dependabot, images Docker sur GHCR      |
 
 Le choix des versions est expliqué dans l'[ADR 0005](docs/adr/0005-politique-de-versions.md).
 
@@ -89,6 +91,7 @@ pnpm --filter @riados/api db:seed          # riad de démonstration
 pnpm dev
 ```
 
+- Application web : <http://localhost:5173>
 - API : <http://localhost:3000/api>
 - Documentation OpenAPI : <http://localhost:3000/api/docs>
 
@@ -100,7 +103,8 @@ Comptes de démonstration (mot de passe `riados-demo-2026`) :
 | Réception    | `reception@riad-yasmine.ma` |
 | Ménage       | `menage@riad-yasmine.ma`    |
 
-Pile complète en conteneurs : `docker compose --profile app up -d --build`.
+Pile complète en conteneurs (front servi par Nginx sur <http://localhost:8080>) :
+`docker compose --profile app up -d --build`, après avoir défini `JWT_ACCESS_SECRET` dans `.env`.
 
 ## API
 
@@ -131,6 +135,7 @@ pnpm test:integration    # PostgreSQL et Redis réels via Testcontainers (Docker
 | ----------- | ----------------------------------------------------------------------------------------- |
 | Unitaires   | Domaine (dates, règles, prix), services, guards, rotation des jetons                      |
 | HTTP        | Contrôleurs avec Supertest : validation, rôles, cookies                                   |
+| Front       | Écrans avec Testing Library : connexion, calendrier, réservation, chambres, pagination    |
 | Intégration | RLS, contraintes, réservations concurrentes, absence de dérive entre migrations et schéma |
 
 Chaque pull request passe par la CI : format, lint, typecheck, tests et couverture, build, tests
@@ -151,6 +156,12 @@ apps/
         booking/        chambres, réservations, domain/
         health/
     test/integration/   Testcontainers
+  web/                  SPA React
+    src/
+      lib/              client HTTP (jeton en mémoire, refresh mutualisé), dates, formats
+      features/         auth, calendar, reservations, rooms
+      components/       UI (style shadcn/ui) et mise en page
+    nginx.conf          en-têtes de sécurité, proxy /api, cache des assets
 docs/                   cahier des charges, user stories, C4, ADR
 infra/                  scripts d'initialisation PostgreSQL
 ```
@@ -161,7 +172,8 @@ infra/                  scripts d'initialisation PostgreSQL
 - [x] Socle : monorepo pnpm, TypeScript strict, lint, hooks Git, CI/CD, scans de sécurité
 - [x] Multi-tenancy par RLS et authentification avec rotation des refresh tokens
 - [x] Chambres, disponibilités, réservations sans surréservation
-- [ ] Application web : connexion, calendrier, gestion des chambres
+- [x] Application web : connexion, calendrier avec réservation, réservations, chambres
+- [ ] Glisser-déposer dans le calendrier, gestion de l'équipe
 - [ ] Facturation : factures PDF par un worker BullMQ, paiement Stripe (adaptateur CMI)
 - [ ] Housekeeping : tâches de ménage, PWA hors-ligne
 - [ ] Channel manager iCal (Airbnb, Booking.com), tarification dynamique
