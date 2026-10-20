@@ -1,0 +1,19 @@
+@import 'tailwindcss';
+
+/* Palette inspired by Marrakech: terracotta walls, sand and zellige green. */
+@theme {
+  --color-brand-50: #fdf6ec;
+  --color-brand-100: #f8e6cf;
+  --color-brand-500: #c9693c;
+  --color-brand-600: #b4532a;
+  --color-brand-700: #923f20;
+  --color-zellige-500: #1f7a6a;
+  --color-zellige-100: #d6efe9;
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+  body {
+    @apply bg-stone-50 text-stone-900 antialiased;
+  }
+}
