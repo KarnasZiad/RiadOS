@@ -15,7 +15,7 @@ COPY apps/web apps/web
 RUN pnpm --filter @riados/web build
 
 # ---- Runtime: static files only, Nginx running as an unprivileged user.
-FROM nginxinc/nginx-unprivileged:1.30-alpine AS runtime
+FROM nginxinc/nginx-unprivileged:1.31-alpine AS runtime
 COPY apps/web/nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /repo/apps/web/dist /usr/share/nginx/html
 # The base image already runs as nginx (uid 101); stating it keeps the guarantee explicit.
